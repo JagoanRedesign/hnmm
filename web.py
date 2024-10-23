@@ -1,5 +1,4 @@
-from flask import Flask, jsonify
-import threading
+from flask import Flask
 
 app = Flask(__name__)
 
@@ -7,22 +6,6 @@ app = Flask(__name__)
 def hello():
     return 'Hello, World!'
 
-
-
-def run_flask():
-    app.run(host='0.0.0.0', port=8000)
-
-if __name__ == "__main__":
-    # Menggunakan event loop default
-    #loop = asyncio.get_event_loop()
-    
-    # Menjalankan Flask di thread terpisah
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-    
-    # Menjalankan bot di event loop utama
-    #loop.run_until_complete(main())
-    
-    # Tunggu hingga thread Flask selesai sebelum keluar
-    flask_thread.join()
-
+if __name__ == '__main__':
+    # Run the Flask app on port 80
+    app.run(host='0.0.0.0', port=80)
