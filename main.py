@@ -1,8 +1,9 @@
-from pyrogram import Client, filters
+from pyrogram import Client, idle as idling
+
 from mzcoder.config import Config
 
 # Create a Pyrogram client
-app = Client(
+client = Client(
     "my_bot",
     api_id=Config.API_ID, 
     api_hash=Config.API_HASH, 
@@ -14,4 +15,6 @@ app = Client(
 
 
 print("I AM ALIVE")
-app.run()
+
+
+idle = idling
