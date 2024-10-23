@@ -1,4 +1,3 @@
-import asyncio
 from flask import Flask, jsonify
 import threading
 
@@ -22,7 +21,7 @@ if __name__ == "__main__":
     flask_thread.start()
     
     # Menjalankan bot di event loop utama
-   # loop.run_until_complete(main())
+    #loop.run_until_complete(main())
     
     # Tunggu hingga thread Flask selesai sebelum keluar
     flask_thread.join()
