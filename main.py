@@ -1,5 +1,9 @@
 from pyrogram import Client
 from mzcoder.config import Config
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Create a Pyrogram client
 app = Client(
@@ -12,5 +16,5 @@ app = Client(
 
 # Start the bot
 if __name__ == "__main__":
-    print("Bot is running...")
+    logging.info("Bot is starting...")
     app.run()
