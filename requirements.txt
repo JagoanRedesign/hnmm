@@ -3,4 +3,3 @@ pyrofork
 flask
 pytz
 gunicorn
-uvloop
