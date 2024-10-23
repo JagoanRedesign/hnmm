@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from mzcoder.config import Config
-from mzcoder.script import Translation
+from mzcoder.text import Translation
 #from mzcoder.forcesub import handle_force_subscribe
 
 
