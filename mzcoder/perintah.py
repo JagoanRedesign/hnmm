@@ -3,7 +3,7 @@ import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from mzcoder.config import Config
 from mzcoder.script import Translation
-from mzcoder.forcesub import handle_force_subscribe
+#from mzcoder.forcesub import handle_force_subscribe
 
 
 
@@ -25,10 +25,10 @@ async def cancel(client, callback_query):
 # About command handler
 @Client.on_message(filters.private & filters.command("about"))
 async def about(client, message):
-    if Config.CHANNEL:
-      fsub = await handle_force_subscribe(client, message)
-      if fsub == 400:
-        return
+   # if Config.CHANNEL:
+     # fsub = await handle_force_subscribe(client, message)
+      #if fsub == 400:
+      #  return
     await message.reply_text(
         text=Translation.ABOUT_TXT,
         disable_web_page_preview=True,
