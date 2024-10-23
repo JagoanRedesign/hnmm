@@ -1,6 +1,6 @@
 import logging
 import asyncio
-import main
+from core import bot
 from flask import Flask, jsonify
 import threading
 
