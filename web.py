@@ -1,16 +1,18 @@
-from flask import Flask
+from flask import Flask, jsonify
 
-# Membuat instance aplikasi Flask
+# Create a Flask instance
 app = Flask(__name__)
 
-# Mendefinisikan endpoint root (/) yang akan merespons permintaan HTTP GET
+# Define the root endpoint
 @app.route('/')
 def hello():
     return jsonify({"message": "Bot is running! by Mz"})
-  # Mengembalikan pesan dan kode status 200
 
-# Mendefinisikan endpoint /health untuk pemeriksaan kesehatan
+# Define the health check endpoint
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy"}), 200
 
-# Menjalankan aplikasi Flask pada host dan port tertentu
+# Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
