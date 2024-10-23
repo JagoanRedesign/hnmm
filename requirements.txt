@@ -4,3 +4,4 @@ pytz
 Flask
 pyrogram
 flask-cors
+yt_dlp
