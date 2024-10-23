@@ -1,37 +1,17 @@
-import logging
-import asyncio
-from core import bot
-from flask import Flask, jsonify
-import threading
+from pyrogram import Client, filters
+from mzcoder.config import Config
 
-app = Flask(__name__)
+# Create a Pyrogram client
+app = Client(
+    "my_bot",
+    api_id=Config.API_ID, 
+    api_hash=Config.API_HASH, 
+    bot_token=Config.BOT_TOKEN,
+    plugins=dict(root="Youtube")
+)
 
-async def main():
-    
-    await bot.client.start()
-    
-    logger.info("I AM ALIVE")
-    await bot.idle()  
-    await bot.client.stop()
-    logger.info("bot stopped!")
 
-@app.route('/')
-def index():
-     return 'Hello, World!'
 
-def run_flask():
-    app.run(host='0.0.0.0', port=8000)
-
-if __name__ == "__main__":
-    # Menggunakan event loop default
-    loop = asyncio.get_event_loop()
-    
-    # Menjalankan Flask di thread terpisah
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-    
-    # Menjalankan bot di event loop utama
-    loop.run_until_complete(main())
-    
-    # Tunggu hingga thread Flask selesai sebelum keluar
-    flask_thread.join()
+# Start the bot
+print("🎊 I AM ALIVE 🎊")
+app.run()
