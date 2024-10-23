@@ -1,11 +1,18 @@
 from flask import Flask
 
+# Membuat instance aplikasi Flask
 app = Flask(__name__)
 
+# Mendefinisikan endpoint root (/) yang akan merespons permintaan HTTP GET
 @app.route('/')
 def hello():
-    return 'Hello, World!'
+    return 'Hello, World!', 200  # Mengembalikan pesan dan kode status 200
 
+# Mendefinisikan endpoint /health untuk pemeriksaan kesehatan
+@app.route('/health')
+def health_check():
+    return 'OK', 200  # Mengembalikan pesan "OK" dan kode status 200
+
+# Menjalankan aplikasi Flask pada host dan port tertentu
 if __name__ == '__main__':
-    # Run the Flask app on port 80
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8000)
