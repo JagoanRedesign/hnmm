@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client
 from mzcoder.config import Config
 
 # Create a Pyrogram client
@@ -10,8 +10,7 @@ app = Client(
     plugins=dict(root="mzcoder")
 )
 
-
-
 # Start the bot
-print("I AM ALIVE")
-app.run()
+if __name__ == "__main__":
+    print("Bot is running...")
+    app.run()
