@@ -9,9 +9,6 @@ def hello():
     return 'Hello, World!', 200  # Mengembalikan pesan dan kode status 200
 
 # Mendefinisikan endpoint /health untuk pemeriksaan kesehatan
-@app.route('/health')
-def health_check():
-    return 'OK', 200  # Mengembalikan pesan "OK" dan kode status 200
 
 # Menjalankan aplikasi Flask pada host dan port tertentu
 if __name__ == '__main__':
