@@ -6,7 +6,8 @@ app = Flask(__name__)
 # Mendefinisikan endpoint root (/) yang akan merespons permintaan HTTP GET
 @app.route('/')
 def hello():
-    return 'Hello, World!', 200  # Mengembalikan pesan dan kode status 200
+    return jsonify({"message": "Bot is running! by Mz"})
+  # Mengembalikan pesan dan kode status 200
 
 # Mendefinisikan endpoint /health untuk pemeriksaan kesehatan
 
