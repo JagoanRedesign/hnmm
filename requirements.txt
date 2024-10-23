@@ -2,3 +2,4 @@ tgcrypto
 pyrofork
 flask
 pytz
+gunicorn
