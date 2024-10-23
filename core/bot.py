@@ -14,7 +14,4 @@ client = Client(
 
 
 
-print("I AM ALIVE")
-
-
 idle = idling
