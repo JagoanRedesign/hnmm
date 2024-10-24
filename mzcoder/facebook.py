@@ -60,9 +60,12 @@ async def process_facebook_video_link(client, message):
                 chat_id=message.chat.id,
                 video=video,
                 thumb=thumb,
-                caption=f"Judul: {info_dict.get('title')}\n"
-                        f"Durasi: {info_dict.get('duration')} detik\n"
-                        f"Ukuran: {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
+                caption=(
+                    f"<b>Judul:</b> {info_dict.get('title')}\n"
+                    f"<b>Durasi:</b> {info_dict.get('duration')} detik\n"
+                    f"<b>Ukuran:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
+                ),
+                parse_mode='html'  # Menambahkan parse_mode untuk format HTML
             )
 
         await asyncio.sleep(1)
@@ -71,7 +74,8 @@ async def process_facebook_video_link(client, message):
         await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
-        await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
+        if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
+            await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
         print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
 
     finally:
