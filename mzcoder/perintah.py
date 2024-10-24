@@ -68,8 +68,5 @@ async def start(client, message):
 # Help command handler
 @Client.on_message(filters.command("help"))
 async def help(client, message):
-    help_text = Translation.HELP_TEXT.format("Mazekubot")
-    await message.reply_text(help_text)
-
-
+    await message.reply_text(text=Translation.HELP_TEXT)
                    
