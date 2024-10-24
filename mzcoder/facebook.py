@@ -13,8 +13,8 @@ async def process_facebook_video_link(client, message):
         downloading_msg = await message.reply_text("Mengunduh video...")
 
         # Definisikan hook kemajuan kustom
-        def progress_hook(d):
-            if d['status'] == 'downloading':
+        async def progress_hook(d):
+            if d['status'] == 'downloading' and d.get('total_bytes'):
                 percent = d['downloaded_bytes'] / d['total_bytes'] * 100
                 speed = d['speed'] / 1024  # Mengonversi ke KB/detik
                 eta = d['eta']  # ETA dalam detik
@@ -27,7 +27,7 @@ async def process_facebook_video_link(client, message):
                                 f"ETA: {int(eta // 3600)}j, {int((eta % 3600) // 60)}m\n")
 
                 # Menggunakan create_task untuk memperbarui pesan
-                asyncio.create_task(downloading_msg.edit(message_text))
+                await downloading_msg.edit(message_text)
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
@@ -46,6 +46,12 @@ async def process_facebook_video_link(client, message):
             info_dict = ydl.extract_info(facebook_link, download=True)
             video_file = ydl.prepare_filename(info_dict)
             thumbnail_file = f'downloads/{info_dict["id"]}.jpg'  # Mengasumsikan thumbnail disimpan sebagai .jpg
+
+        # Periksa apakah file video dan thumbnail ada
+        if not os.path.exists(video_file):
+            raise FileNotFoundError("File video tidak ditemukan.")
+        if not os.path.exists(thumbnail_file):
+            raise FileNotFoundError("File thumbnail tidak ditemukan.")
 
         # Beri tahu bahwa unduhan telah selesai
         uploading_msg = await downloading_msg.edit("Proses upload...")
@@ -67,8 +73,8 @@ async def process_facebook_video_link(client, message):
         await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
-        await downloading_msg.edit("Terjadi kesalahan saat mengunduh atau mengunggah video.")
-        print(e)
+        await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
+        print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
 
     finally:
         # Bersihkan file video yang diunduh
