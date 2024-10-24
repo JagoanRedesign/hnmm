@@ -66,15 +66,15 @@ async def process_facebook_video_link(client, message):
                 video=video,
                 thumb=thumb,
                 caption=(
-                           f"<b>Judul:</b> {info_dict.get('title')}\n"      
-                           f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
-                           f"<b>Upload by:</b> @FaceBookDownloadsRobot"
-                             ),
+                    f"<b>Judul:</b> {info_dict.get('title')}\n"      
+                    f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
+                    f"<b>Upload by:</b> @FaceBookDownloadsRobot"
+                ),
                 parse_mode='html'
             )
-            
+        
         # Beri tahu pengguna bahwa upload berhasil
-         await uploading_msg.delete()
+        await uploading_msg.delete()
         
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
