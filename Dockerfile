@@ -13,9 +13,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
+# Update yt-dlp to the latest version
 RUN yt-dlp -U
 
-# Expose the port Flask runs on
+# Expose the port Flask runs on (adjust if needed for your app)
 EXPOSE 8000
 
 # Run the Flask app and bot
