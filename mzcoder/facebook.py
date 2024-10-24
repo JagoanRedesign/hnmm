@@ -15,14 +15,17 @@ async def process_facebook_video_link(client, message):
         # Definisikan hook kemajuan kustom
         def progress_hook(d):
             if d['status'] == 'downloading' and d.get('total_bytes'):
-                percent = d['downloaded_bytes'] / d['total_bytes'] * 100
-                speed = d['speed'] / 1024  # Mengonversi ke KB/detik
-                eta = d['eta']  # ETA dalam detik
+                downloaded_bytes = d.get('downloaded_bytes', 0)
+                total_bytes = d.get('total_bytes', 1)  # Menghindari pembagian dengan 0
+                speed = d.get('speed', 0) / 1024  # Mengonversi ke KB/detik
+                eta = d.get('eta', 0)  # ETA dalam detik
+
+                percent = (downloaded_bytes / total_bytes) * 100 if total_bytes else 0
 
                 progress_bar = '█' * int(percent // 2) + '▒' * (50 - int(percent // 2))
                 message_text = (f"Mengunduh: {percent:.2f}%\n"
                                 f"[{progress_bar}]\n"
-                                f"{d['downloaded_bytes'] / (1024 * 1024):.2f} MB dari {d['total_bytes'] / (1024 * 1024):.2f} MB\n"
+                                f"{downloaded_bytes / (1024 * 1024):.2f} MB dari {total_bytes / (1024 * 1024):.2f} MB\n"
                                 f"Kecepatan: {speed:.2f} KB/detik\n"
                                 f"ETA: {int(eta // 3600)}j, {int((eta % 3600) // 60)}m\n")
 
