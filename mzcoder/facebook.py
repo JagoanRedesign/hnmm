@@ -10,11 +10,10 @@ from mzcoder.forcesub import handle_force_subscribe
 
 @Client.on_message(filters.regex(r'^https?:\/\/(www\.)?facebook\.com\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
 async def process_facebook_video_link(client, message):
-    
-    if Config.CHANNEL:
-     fsub = await handle_force_subscribe(client, message)
-      if fsub == 400:
-      return
+     if Config.CHANNEL:
+       fsub = await handle_force_subscribe(client, message)
+       if fsub == 400:
+           return
           
     facebook_link = message.text
     video_file = None
