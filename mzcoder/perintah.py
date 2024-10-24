@@ -49,7 +49,7 @@ async def start(client, message):
         #return
     #user = message.from_user
     await message.reply_text(
-        text=Translation.START_TEXT.format(message.from_user.first_name, wish),
+        text=Translation.START_TEXT.format(message.from_user.first_name),
         reply_markup=InlineKeyboardMarkup(
         [
             [
@@ -57,7 +57,7 @@ async def start(client, message):
             ],
             [
                 InlineKeyboardButton('Developer', url='https://t.me/MzCoder'),
-                InlineKeyboardButton('Support Group', url='https://t.me/DutaSUPPORT'),
+                InlineKeyboardButton('Support Group', url='https://t.me/DutabotSupport'),
             ],
             [
                 InlineKeyboardButton('Close', callback_data='cancel')
@@ -68,7 +68,8 @@ async def start(client, message):
 # Help command handler
 @Client.on_message(filters.command("help"))
 async def help(client, message):
-    help_text = """
-Welcome to  to Bot!
-    """
+    help_text = Translation.HELP_TEXT.format("Mazekubot")
     await message.reply_text(help_text)
+
+
+                   
