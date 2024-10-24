@@ -25,9 +25,9 @@ async def process_facebook_video_link(client, message):
                                 f"{d['downloaded_bytes'] / (1024 * 1024):.2f} MB dari {d['total_bytes'] / (1024 * 1024):.2f} MB\n"
                                 f"Kecepatan: {speed:.2f} KB/detik\n"
                                 f"ETA: {int(eta // 3600)}j, {int((eta % 3600) // 60)}m\n")
-                
-                # Memperbarui pesan dengan aman
-                asyncio.run_coroutine_threadsafe(downloading_msg.edit_text(message_text), client)
+
+                # Menggunakan create_task untuk memperbarui pesan
+                asyncio.create_task(downloading_msg.edit(message_text))
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
@@ -51,14 +51,15 @@ async def process_facebook_video_link(client, message):
         uploading_msg = await downloading_msg.edit("Proses upload...")
 
         # Unggah video ke Telegram dengan thumbnail
-        await client.send_video(
-            chat_id=message.chat.id,
-            video=open(video_file, 'rb'),
-            thumb=open(thumbnail_file, 'rb'),
-            caption=f"Judul: {info_dict.get('title')}\n"
-                    f"Durasi: {info_dict.get('duration')} detik\n"
-                    f"Ukuran: {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
-        )
+        with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
+            await client.send_video(
+                chat_id=message.chat.id,
+                video=video,
+                thumb=thumb,
+                caption=f"Judul: {info_dict.get('title')}\n"
+                        f"Durasi: {info_dict.get('duration')} detik\n"
+                        f"Ukuran: {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
+            )
 
         await asyncio.sleep(2)
         await uploading_msg.delete()
