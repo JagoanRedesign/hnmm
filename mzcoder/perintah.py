@@ -3,6 +3,7 @@ import datetime
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from mzcoder.config import Config
 from mzcoder.text import Translation
+from .user_management import add_user, get_all_users
 #from mzcoder.forcesub import handle_force_subscribe
 
 
@@ -29,6 +30,7 @@ async def about(client, message):
      # fsub = await handle_force_subscribe(client, message)
       #if fsub == 400:
       #  return
+    add_user(message.from_user.id)
     await message.reply_text(
         text=Translation.ABOUT_TXT,
         disable_web_page_preview=True,
@@ -48,6 +50,7 @@ async def start(client, message):
       #if fsub == 400:
         #return
     #user = message.from_user
+    add_user(message.from_user.id)
     await message.reply_text(
         text=Translation.START_TEXT.format(message.from_user.first_name),
         reply_markup=InlineKeyboardMarkup(
@@ -68,5 +71,6 @@ async def start(client, message):
 # Help command handler
 @Client.on_message(filters.command("help"))
 async def help(client, message):
+    add_user(message.from_user.id)
     await message.reply_text(text=Translation.HELP_TEXT)
                    
