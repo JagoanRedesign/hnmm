@@ -18,14 +18,16 @@ async def process_facebook_video_link(client, message):
                 percent = d['downloaded_bytes'] / d['total_bytes'] * 100
                 speed = d['speed'] / 1024  # Mengonversi ke KB/detik
                 eta = d['eta']  # ETA dalam detik
-                
+
                 progress_bar = '█' * int(percent // 2) + '▒' * (50 - int(percent // 2))
                 message_text = (f"Mengunduh: {percent:.2f}%\n"
                                 f"[{progress_bar}]\n"
                                 f"{d['downloaded_bytes'] / (1024 * 1024):.2f} MB dari {d['total_bytes'] / (1024 * 1024):.2f} MB\n"
                                 f"Kecepatan: {speed:.2f} KB/detik\n"
                                 f"ETA: {int(eta // 3600)}j, {int((eta % 3600) // 60)}m\n")
-                asyncio.run_coroutine_threadsafe(downloading_msg.edit(message_text), client)
+                
+                # Memperbarui pesan dengan aman
+                asyncio.run_coroutine_threadsafe(downloading_msg.edit_text(message_text), client)
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
