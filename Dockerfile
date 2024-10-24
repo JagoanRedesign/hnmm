@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
+RUN yt-dlp -U
+
 # Expose the port Flask runs on
 EXPOSE 8000
 
