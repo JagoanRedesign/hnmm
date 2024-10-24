@@ -9,9 +9,9 @@ async def process_facebook_video_link(client, message):
     video_file = None
     thumbnail_file = None
     try:
-        # Beri tahu pengguna bahwa pengunduhan sedang dimulai        
-        downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>", parse_mode='html')
-       
+        # Beri tahu pengguna bahwa pengunduhan sedang dimulai
+        downloading_msg = await message.reply_text("Mengunduh video...")
+
         # Definisikan hook kemajuan kustom
         def progress_hook(d):
             if d['status'] == 'downloading':
@@ -52,36 +52,28 @@ async def process_facebook_video_link(client, message):
             raise FileNotFoundError("File thumbnail tidak ditemukan.")
 
         # Beri tahu bahwa unduhan telah selesai
-        uploading_msg = await downloading_msg.edit("<i>Proses upload...</i>")
-       
-       
-         await asyncio.sleep(1)
-        
-        
+        uploading_msg = await downloading_msg.edit("Proses upload...")
+
         # Unggah video ke Telegram dengan thumbnail
         with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
             await client.send_video(
                 chat_id=message.chat.id,
                 video=video,
                 thumb=thumb,
-                caption=(
-                           f"<b>Judul:</b> {info_dict.get('title')}\n"      
-                           f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
-                           f"<b>Upload by:</b> @FaceBookDownloadsRobot"
-                             ),
-                parse_mode='html'
+                caption=f"Judul: {info_dict.get('title')}\n"
+                        f"Durasi: {info_dict.get('duration')} detik\n"
+                        f"Ukuran: {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
             )
-            
-        
+
+        await asyncio.sleep(1)
+        await uploading_msg.delete()
         # Beri tahu pengguna bahwa upload berhasil
-        #await message.reply_text("Video berhasil diunggah!")
+        await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
         await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
         print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
-      
-         
-         await uploading_msg.delete()
+
     finally:
         # Bersihkan file video yang diunduh
         if video_file and os.path.exists(video_file):
