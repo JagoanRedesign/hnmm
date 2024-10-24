@@ -13,10 +13,10 @@ class Translation(object):
         "╰───────────────⍟"
     )
 
-    HELP_TXT = (
+    HELP_TEXT = (
         "📋 Bantuan untuk Menggunakan Bot Download Video Facebook:\n\n"
         "1. Kirim tautan video Facebook yang valid kepada bot.\n"
         "2. Bot akan mengunduh video tersebut dan mengirimkannya kembali kepada Anda.\n"
         "3. Tunggu hingga proses pengunduhan dan pengunggahan selesai.\n\n"
-        "Jika Anda mengalami kesulitan, Anda dapat menghubungi pengembang bot di @{0}."
+        "Jika Anda mengalami kesulitan, Anda dapat menghubungi pengembang bot di @Mazekubot."
     )
