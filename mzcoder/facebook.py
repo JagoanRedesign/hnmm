@@ -42,6 +42,7 @@ async def process_facebook_video_link(client, message):
             'writethumbnail': True,  # Unduh thumbnail
             'noplaylist': True,  # Jangan unduh playlist
             'progress_hooks': [progress_hook],  # Tambahkan hook kemajuan kustom
+            'nocheckcertificate': True,
         }
 
         # Buat direktori unduhan jika belum ada
