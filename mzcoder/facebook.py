@@ -17,11 +17,7 @@ async def process_facebook_video_link(client, message):
     video_file = None
     thumbnail_file = None
     try:
-        downloading_msg = await message.reply_text(
-            "<b><i>Mengunduh video...</i></b>",
-            parse_mode=ParseMode.HTML,
-            reply_to_message_id=message.message_id
-        )
+        downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>",  parse_mode=ParseMode.HTML)
 
         # Definisikan hook kemajuan kustom
         def progress_hook(d):
