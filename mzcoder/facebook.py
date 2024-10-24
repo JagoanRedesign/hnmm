@@ -25,7 +25,10 @@ async def process_facebook_video_link(client, message):
                 message_text = f"Mengunduh: {percent:.2f}% (Downloaded: {downloaded_bytes / (1024 * 1024):.2f} MB dari {total_bytes / (1024 * 1024):.2f} MB)"
                 
                 # Memperbarui pesan di thread utama
-                asyncio.create_task(downloading_msg.edit(message_text))
+                try:
+                    asyncio.create_task(downloading_msg.edit(message_text))
+                except Exception as e:
+                    print(f"Error editing message: {e}")
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
@@ -54,10 +57,8 @@ async def process_facebook_video_link(client, message):
         # Beri tahu bahwa unduhan telah selesai
         uploading_msg = await downloading_msg.edit("<i>Proses upload...</i>")
        
-       
-         await asyncio.sleep(1)
-        await uploading_msg.delete()
-        
+        await asyncio.sleep(1)
+
         # Unggah video ke Telegram dengan thumbnail
         with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
             await client.send_video(
@@ -72,12 +73,12 @@ async def process_facebook_video_link(client, message):
                 parse_mode='html'
             )
             
-        
         # Beri tahu pengguna bahwa upload berhasil
-        #await message.reply_text("Video berhasil diunggah!")
+        await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
-        await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
+        if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
+            await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
         print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
 
     finally:
