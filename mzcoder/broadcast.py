@@ -4,7 +4,7 @@ from pyrogram import errors
 from .user_management import add_user, get_all_users
 
 YOUR_ADMIN_USER_ID = 5166575484  # Ganti dengan ID admin Anda
-add_user(user_id)
+
 
 @Client.on_message(filters.command("broadcast") & filters.user(YOUR_ADMIN_USER_ID))
 async def broadcast_command(client, message):
