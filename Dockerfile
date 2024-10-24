@@ -1,20 +1,24 @@
-# Use the official Python image
-FROM python:3.9
+# Gunakan image Python yang ringan
+FROM python:3.9-slim
 
-# Set the working directory
+# Set direktori kerja
 WORKDIR /app
 
-# Copy the requirements file
+# Salin file requirements.txt
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Update dan install FFmpeg (jika diperlukan) dan dependensi
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the rest of the application code
+# Salin sisa kode aplikasi
 COPY . .
 
-# Expose the port Flask runs on
+# Expose port yang digunakan Flask
 EXPOSE 8000
 
-# Run the Flask app and bot
+# Jalankan aplikasi Flask dan bot dengan supervisord
 CMD ["sh", "-c", "python web.py & python main.py"]
