@@ -1,6 +1,6 @@
 import asyncio
 from pyrogram import Client, enums
-from Youtube.config import Config
+from mzcoder.config import Config
 from pyrogram.errors import FloodWait, UserNotParticipant
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
