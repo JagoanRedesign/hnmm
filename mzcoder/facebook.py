@@ -4,7 +4,6 @@ from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from mzcoder.config import Config
 from mzcoder.forcesub import handle_force_subscribe
-
 import yt_dlp
 
 @Client.on_message(filters.regex(r'https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*'))
@@ -19,8 +18,7 @@ async def process_facebook_video_link(client, message):
     thumbnail_file = None
     try:
         # Beri tahu pengguna bahwa pengunduhan sedang dimulai
-        
-     downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>",  parse_mode=ParseMode.HTML)
+        downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>", parse_mode=ParseMode.HTML)
 
         # Definisikan hook kemajuan kustom
         def progress_hook(d):
@@ -64,6 +62,7 @@ async def process_facebook_video_link(client, message):
         # Beri tahu bahwa unduhan telah selesai
         uploading_msg = await downloading_msg.edit("Proses upload...")
         await asyncio.sleep(1)
+
         # Unggah video ke Telegram dengan thumbnail
         with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
             await client.send_video(
@@ -75,18 +74,16 @@ async def process_facebook_video_link(client, message):
                     f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
                     f"<b>Upload by:</b> @FaceBookDownloadsRobot"
                 ),
-                parse_mode=ParseMode.HTML  # Menambahkan parse_mode untuk format HTML
+                parse_mode=ParseMode.HTML
             )
 
-        
         await uploading_msg.delete()
-        # Beri tahu pengguna bahwa upload berhasil
-        #await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
+            print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
             await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
-        print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
+        
 
     finally:
         # Bersihkan file video yang diunduh
