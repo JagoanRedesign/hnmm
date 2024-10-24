@@ -5,4 +5,3 @@ Flask
 pyrogram
 flask-cors
 yt_dlp
-ffmpeg-python
