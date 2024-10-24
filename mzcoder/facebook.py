@@ -86,6 +86,3 @@ async def process_facebook_video_link(client, message):
         if thumbnail_file and os.path.exists(thumbnail_file):
             os.remove(thumbnail_file)
 
-@Client.on_message(filters.regex(r'^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*$') & ~filters.regex(r'^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
-async def invalid_url(client, message):
-    await message.reply_text("Silakan kirim tautan Facebook yang valid.")
