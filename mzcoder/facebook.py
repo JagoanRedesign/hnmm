@@ -24,8 +24,8 @@ async def process_facebook_video_link(client, message):
                 # Memperbarui pesan dengan informasi dasar
                 message_text = f"Mengunduh: {percent:.2f}% (Downloaded: {downloaded_bytes / (1024 * 1024):.2f} MB dari {total_bytes / (1024 * 1024):.2f} MB)"
                 
-                # Memperbarui pesan menggunakan asyncio.run_coroutine_threadsafe
-                asyncio.run_coroutine_threadsafe(downloading_msg.edit(message_text), client)
+                # Memperbarui pesan di thread utama
+                asyncio.create_task(downloading_msg.edit(message_text))
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
