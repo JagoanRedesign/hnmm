@@ -13,7 +13,7 @@ async def process_facebook_video_link(client, message):
         downloading_msg = await message.reply_text("Mengunduh video...")
 
         # Definisikan hook kemajuan kustom
-        async def progress_hook(d):
+        def progress_hook(d):
             if d['status'] == 'downloading' and d.get('total_bytes'):
                 percent = d['downloaded_bytes'] / d['total_bytes'] * 100
                 speed = d['speed'] / 1024  # Mengonversi ke KB/detik
@@ -26,8 +26,8 @@ async def process_facebook_video_link(client, message):
                                 f"Kecepatan: {speed:.2f} KB/detik\n"
                                 f"ETA: {int(eta // 3600)}j, {int((eta % 3600) // 60)}m\n")
 
-                # Menggunakan create_task untuk memperbarui pesan
-                await downloading_msg.edit(message_text)
+                # Memperbarui pesan menggunakan asyncio.run_coroutine_threadsafe
+                asyncio.run_coroutine_threadsafe(downloading_msg.edit(message_text), client)
 
         # Definisikan opsi untuk yt-dlp
         ydl_opts = {
