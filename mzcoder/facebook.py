@@ -1,6 +1,7 @@
 import os
 import asyncio
 from pyrogram import Client, filters
+from pyrogram.enums import ParseMode
 import yt_dlp
 
 @Client.on_message(filters.regex(r'^https?:\/\/(www\.)?facebook\.com\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
@@ -53,7 +54,7 @@ async def process_facebook_video_link(client, message):
 
         # Beri tahu bahwa unduhan telah selesai
         uploading_msg = await downloading_msg.edit("Proses upload...")
-
+        await asyncio.sleep(1)
         # Unggah video ke Telegram dengan thumbnail
         with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
             await client.send_video(
@@ -62,16 +63,16 @@ async def process_facebook_video_link(client, message):
                 thumb=thumb,
                 caption=(
                     f"<b>Judul:</b> {info_dict.get('title')}\n"
-                    f"<b>Durasi:</b> {info_dict.get('duration')} detik\n"
-                    f"<b>Ukuran:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB"
+                    f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
+                    f"<b>Upload by:</b> @FaceBookDownloadsRobot"
                 ),
-                parse_mode='html'  # Menambahkan parse_mode untuk format HTML
+                parse_mode=ParseMode.HTML  # Menambahkan parse_mode untuk format HTML
             )
 
-        await asyncio.sleep(1)
+        
         await uploading_msg.delete()
         # Beri tahu pengguna bahwa upload berhasil
-        await message.reply_text("Video berhasil diunggah!")
+        #await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
