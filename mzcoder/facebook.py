@@ -74,8 +74,8 @@ async def process_facebook_video_link(client, message):
             )
             
         # Beri tahu pengguna bahwa upload berhasil
-        await message.reply_text("Video berhasil diunggah!")
-
+         await uploading_msg.delete()
+        
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
             await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
