@@ -1,21 +1,23 @@
 import os
 import asyncio
-import subprocess
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 import yt_dlp
 
-
-@Client.on_message(filters.regex(r'^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
+@Client.on_message(filters.regex(r'^https?:\/\/(www\.)?facebook\.com\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
 async def process_facebook_video_link(client, message):
     facebook_link = message.text
     video_file = None
     thumbnail_file = None
-    fixed_video_file = None
     try:
         # Beri tahu pengguna bahwa pengunduhan sedang dimulai
-        #downloading_msg = await message.reply_text("Mengunduh video...")
-        downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>", parse_mode=ParseMode.HTML)
+        
+     downloading_msg = await message.reply_text(
+      "<b><i>Mengunduh video...</i></b>",
+       parse_mode=ParseMode.HTML,
+       reply_to_message_id=message.message_id  # This replies to the original message
+       )
+
         # Definisikan hook kemajuan kustom
         def progress_hook(d):
             if d['status'] == 'downloading':
@@ -55,30 +57,27 @@ async def process_facebook_video_link(client, message):
         if not os.path.exists(thumbnail_file):
             raise FileNotFoundError("File thumbnail tidak ditemukan.")
 
-        # Proses video dengan FFmpeg
-        fixed_video_file = f'downloads/fixed_{os.path.basename(video_file)}'
-        ffmpeg_command = ['ffmpeg', '-i', video_file, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', fixed_video_file]
-        subprocess.run(ffmpeg_command, check=True)  # Jalankan perintah FFmpeg
-
         # Beri tahu bahwa unduhan telah selesai
         uploading_msg = await downloading_msg.edit("Proses upload...")
         await asyncio.sleep(1)
-        
         # Unggah video ke Telegram dengan thumbnail
-        with open(fixed_video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
+        with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
             await client.send_video(
                 chat_id=message.chat.id,
                 video=video,
                 thumb=thumb,
                 caption=(
                     f"<b>Judul:</b> {info_dict.get('title')}\n"
-                    f"<b>Size:</b> {os.path.getsize(fixed_video_file) / (1024 * 1024):.2f} MB\n"
+                    f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
                     f"<b>Upload by:</b> @FaceBookDownloadsRobot"
                 ),
                 parse_mode=ParseMode.HTML  # Menambahkan parse_mode untuk format HTML
             )
 
+        
         await uploading_msg.delete()
+        # Beri tahu pengguna bahwa upload berhasil
+        #await message.reply_text("Video berhasil diunggah!")
 
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
@@ -92,11 +91,3 @@ async def process_facebook_video_link(client, message):
         # Bersihkan file thumbnail jika ada
         if thumbnail_file and os.path.exists(thumbnail_file):
             os.remove(thumbnail_file)
-        # Bersihkan file video yang sudah diproses jika ada
-        if fixed_video_file and os.path.exists(fixed_video_file):
-            os.remove(fixed_video_file)
-            
-@Client.on_message(filters.regex(r'^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*$') & ~filters.regex(r'^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/(share\/v|[0-9]+\/videos)\/[A-Za-z0-9]+\/\??.*$'))
-async def invalid_url(client, message):
-    await message.reply_text("Silakan kirim tautan Facebook yang valid.")
-            
