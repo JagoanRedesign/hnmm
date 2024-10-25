@@ -8,7 +8,25 @@ from mzcoder.forcesub import handle_force_subscribe
 from moviepy.editor import VideoFileClip
 
 def get_url(vid_url):
-    # ... (fungsi ini tetap sama)
+    try:
+        base_url = "https://facebook-video-downloader.fly.dev/app/main.php"
+        payload = {'url': vid_url}
+        
+        response = requests.post(base_url, data=payload)
+        print(f"Response status code: {response.status_code}")  # Log status kode
+
+        if response.status_code == 200:
+            response_data = response.json()
+            download_links = response_data.get("links", {})
+            high_quality_link = download_links.get("Download High Quality")
+            return high_quality_link
+        else:
+            print("Error: Unable to fetch data from the server.")
+            return None
+
+    except Exception as e:
+        print(f"😴 Gagal mengambil data url: {e}")
+        return None
 
 def extract_thumbnail(video_file, thumbnail_file):
     with VideoFileClip(video_file) as video:
