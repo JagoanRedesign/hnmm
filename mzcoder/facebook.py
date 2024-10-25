@@ -1,10 +1,31 @@
 import os
 import asyncio
+import requests
 from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
 from mzcoder.config import Config
 from mzcoder.forcesub import handle_force_subscribe
-import yt_dlp
+
+def get_url(vid_url):
+    try:
+        base_url = "https://facebook-video-downloader.fly.dev/app/main.php"
+        payload = {'url': vid_url}
+        
+        response = requests.post(base_url, data=payload)
+        print(f"Response status code: {response.status_code}")  # Log status kode
+
+        if response.status_code == 200:
+            response_data = response.json()
+            download_links = response_data.get("links", {})
+            high_quality_link = download_links.get("Download High Quality")
+            return high_quality_link
+        else:
+            print("Error: Unable to fetch data from the server.")
+            return None
+
+    except Exception as e:
+        print(f"😴 Gagal mengambil data url: {e}")
+        return None
 
 @Client.on_message(filters.regex(r'https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*'))
 async def process_facebook_video_link(client, message):
@@ -17,61 +38,40 @@ async def process_facebook_video_link(client, message):
     video_file = None
     thumbnail_file = None
     try:
-        # Beri tahu pengguna bahwa pengunduhan sedang dimulai
+        # Notify the user that the download is starting
         downloading_msg = await message.reply_text("<b><i>Mengunduh video...</i></b>", parse_mode=ParseMode.HTML)
 
-        # Definisikan hook kemajuan kustom
-        def progress_hook(d):
-            if d['status'] == 'downloading':
-                downloaded_bytes = d.get('downloaded_bytes', 0)
-                total_bytes = d.get('total_bytes', 1)  # Menghindari pembagian dengan 0
+        # Fetch the high-quality download link
+        high_quality_link = get_url(facebook_link)
+        if not high_quality_link:
+            await downloading_msg.edit("Gagal mendapatkan link unduhan.")
+            return
 
-                # Menghitung persentase
-                percent = (downloaded_bytes / total_bytes) * 100 if total_bytes > 0 else 0
-
-                # Memperbarui pesan dengan informasi dasar
-                message_text = f"Mengunduh: {percent:.2f}% (Downloaded: {downloaded_bytes / (1024 * 1024):.2f} MB dari {total_bytes / (1024 * 1024):.2f} MB)"
-                
-                # Memperbarui pesan di thread utama
-                asyncio.create_task(downloading_msg.edit(message_text))
-
-        # Definisikan opsi untuk yt-dlp
-        ydl_opts = {
-            'format': 'best',  # Unduh kualitas terbaik yang tersedia
-            'outtmpl': 'downloads/%(id)s.%(ext)s',  # Simpan di folder unduhan
-            'writethumbnail': True,  # Unduh thumbnail
-            'noplaylist': True,  # Jangan unduh playlist
-            'progress_hooks': [progress_hook],  # Tambahkan hook kemajuan kustom
-            'nocheckcertificate': True,
-        }
-
-        # Buat direktori unduhan jika belum ada
+        # Download video using the high-quality link
+        downloading_msg = await downloading_msg.edit("<b><i>Video sedang diunduh...</i></b>", parse_mode=ParseMode.HTML)
+        video_file = "downloads/video.mp4"  # Change this path as needed
         os.makedirs('downloads', exist_ok=True)
 
-        # Unduh video
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(facebook_link, download=True)
-            video_file = ydl.prepare_filename(info_dict)
-            thumbnail_file = f'downloads/{info_dict["id"]}.jpg'  # Mengasumsikan thumbnail disimpan sebagai .jpg
+        # Download the video file
+        response = requests.get(high_quality_link)
+        if response.status_code == 200:
+            with open(video_file, 'wb') as f:
+                f.write(response.content)
+        else:
+            await downloading_msg.edit("Gagal mengunduh video dari link yang diberikan.")
+            return
 
-        # Periksa apakah file video dan thumbnail ada
-        if not os.path.exists(video_file):
-            raise FileNotFoundError("File video tidak ditemukan.")
-        if not os.path.exists(thumbnail_file):
-            raise FileNotFoundError("File thumbnail tidak ditemukan.")
-
-        # Beri tahu bahwa unduhan telah selesai
+        # Notify that the download is complete
         uploading_msg = await downloading_msg.edit("Proses upload...")
         await asyncio.sleep(1)
 
-        # Unggah video ke Telegram dengan thumbnail
-        with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
+        # Upload video to Telegram
+        with open(video_file, 'rb') as video:
             await client.send_video(
                 chat_id=message.chat.id,
                 video=video,
-                thumb=thumb,
                 caption=(
-                    f"<b>Judul:</b> {info_dict.get('title')}\n"
+                   # f"<b>Judul:</b> Video dari Facebook\n"
                     f"<b>Size:</b> {os.path.getsize(video_file) / (1024 * 1024):.2f} MB\n"
                     f"<b>Upload by:</b> @FaceBookDownloadsRobot"
                 ),
@@ -81,15 +81,11 @@ async def process_facebook_video_link(client, message):
         await uploading_msg.delete()
 
     except Exception as e:
-        if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
-            print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
+        if 'downloading_msg' in locals():  # Ensure downloading_msg exists
+            print(f"Error: {e}")  # Print error to console for debugging
             await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
         
-
     finally:
-        # Bersihkan file video yang diunduh
+        # Clean up the downloaded video file
         if video_file and os.path.exists(video_file):
             os.remove(video_file)
-        # Bersihkan file thumbnail jika ada
-        if thumbnail_file and os.path.exists(thumbnail_file):
-            os.remove(thumbnail_file)
