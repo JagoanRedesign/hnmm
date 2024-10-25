@@ -6,3 +6,4 @@ pyrogram
 flask-cors
 aiohttp
 requests
+moviepy
