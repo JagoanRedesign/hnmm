@@ -1,6 +1,6 @@
 class Translation(object):
     START_TEXT = (
-        "👋 Hello, **{0}** Selamat datang di Bot Download Video Facebook!\n\n"
+        "👋 Hello, **{0}** Selamat datang di Bot Facebook Downloader!\n\n"
         "Untuk menggunakan bot ini, cukup kirimkan tautan video Facebook yang ingin Anda unduh. Ketika video berhasil diunduh, bot akan mengirimkan video tersebut kepada Anda."
     )
 
@@ -13,7 +13,7 @@ class Translation(object):
     )
 
     HELP_TEXT = (
-        "📋 Bantuan untuk Menggunakan Bot Download Video Facebook:\n\n"
+        "**Bantuan untuk Menggunakan Bot:**\n\n"
         "1. Kirim tautan video Facebook yang valid kepada bot.\n"
         "2. Bot akan mengunduh video tersebut dan mengirimkannya kembali kepada Anda.\n"
         "3. Tunggu hingga proses pengunduhan dan pengunggahan selesai.\n\n"
