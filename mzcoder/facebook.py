@@ -6,6 +6,7 @@ from pyrogram.enums import ParseMode
 from mzcoder.config import Config
 from mzcoder.forcesub import handle_force_subscribe
 from moviepy.editor import VideoFileClip
+from tqdm import tqdm  # Impor tqdm untuk progress bar
 
 def get_url(vid_url):
     try:
@@ -58,14 +59,16 @@ async def process_facebook_video_link(client, message):
         video_file = "downloads/video.mp4"
         os.makedirs('downloads', exist_ok=True)
 
-        # Download the video file
-        response = requests.get(high_quality_link)
-        if response.status_code == 200:
-            with open(video_file, 'wb') as f:
-                f.write(response.content)
-        else:
-            await downloading_msg.edit("Gagal mengunduh video dari link yang diberikan.")
-            return
+        # Download the video file with progress bar
+        response = requests.get(high_quality_link, stream=True)  # Gunakan stream=True untuk pelacakan kemajuan
+        total_size = int(response.headers.get('content-length', 0))  # Dapatkan ukuran total video
+        with open(video_file, 'wb') as f, tqdm(
+            total=total_size, unit='B', unit_scale=True, unit_divisor=1024,
+            desc='Mengunduh', bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{rate_fmt}{postfix}]'
+        ) as bar:
+            for data in response.iter_content(chunk_size=4096):
+                f.write(data)
+                bar.update(len(data))  # Perbarui progress bar
 
         # Ekstrak thumbnail dari video
         thumbnail_file = "downloads/thumbnail.jpg"
@@ -76,7 +79,7 @@ async def process_facebook_video_link(client, message):
         with VideoFileClip(video_file) as video:
             duration = video.duration  # Durasi dalam detik
 
-        # Notify that the download is complete
+        # Notify that the upload is starting
         uploading_msg = await downloading_msg.edit("Proses upload...")
         await asyncio.sleep(1)
 
@@ -98,14 +101,14 @@ async def process_facebook_video_link(client, message):
         await uploading_msg.delete()
 
     except Exception as e:
-        if 'downloading_msg' in locals():  # Ensure downloading_msg exists
-            print(f"Error: {e}")  # Print error to console for debugging
+        if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
+            print(f"Error: {e}")  # Cetak kesalahan ke konsol untuk debugging
             await downloading_msg.edit(f"Terjadi kesalahan saat mengunduh atau mengunggah video: {str(e)}")
-        
+
     finally:
-        # Clean up the downloaded video file
+        # Hapus file video yang diunduh
         if video_file and os.path.exists(video_file):
             os.remove(video_file)
-        # Clean up the thumbnail file if it exists
+        # Hapus file thumbnail jika ada
         if thumbnail_file and os.path.exists(thumbnail_file):
             os.remove(thumbnail_file)
