@@ -34,27 +34,34 @@ def extract_thumbnail(video_file, thumbnail_file):
         # Ambil frame pada detik ke-1 sebagai thumbnail
         video.save_frame(thumbnail_file, t=1)
 
-async def upload_video_with_progress(client, chat_id, video_file, thumbnail_file, caption):
+async def upload_video_with_progress(client, chat_id, video_file, thumbnail_file, caption, uploading_msg):
     file_size = os.path.getsize(video_file)
-    with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
-        with tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024, desc='Mengunggah') as bar:
-            # Mengunggah video
-            async def upload_chunk():
-                while True:
-                    chunk = video.read(4096)  # Baca dalam potongan 4096 byte
-                    if not chunk:
-                        break
-                    await client.send_video(
-                        chat_id=chat_id,
-                        video=chunk,
-                        thumb=thumb,
-                        caption=caption,
-                        parse_mode=ParseMode.HTML,
-                        supports_streaming=True
-                    )
-                    bar.update(len(chunk))  # Perbarui progress bar
+    uploaded_size = 0  # Menyimpan ukuran yang sudah diunggah
+    chunk_size = 1024 * 1024  # 1 MB
 
-            await upload_chunk()
+    with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
+        while True:
+            chunk = video.read(chunk_size)
+            if not chunk:
+                break
+            
+            # Mengunggah video (dalam potongan)
+            await client.send_video(
+                chat_id=chat_id,
+                video=chunk,
+                thumb=thumb,
+                caption=caption,
+                parse_mode=ParseMode.HTML,
+                supports_streaming=True
+            )
+
+            # Update ukuran yang sudah diunggah
+            uploaded_size += len(chunk)
+
+            # Update pesan setiap 4 MB
+            if uploaded_size % (4 * 1024 * 1024) < len(chunk):  # Cek apakah sudah mencapai 4 MB
+                progress_percentage = (uploaded_size / file_size) * 100
+                await uploading_msg.edit(f"Proses upload... {progress_percentage:.2f}% ({uploaded_size / (1024 * 1024):.2f} MB dari {file_size / (1024 * 1024):.2f} MB)")
 
 @Client.on_message(filters.regex(r'https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*'))
 async def process_facebook_video_link(client, message):
@@ -111,7 +118,8 @@ async def process_facebook_video_link(client, message):
             f"<b>Duration:</b> {duration:.2f} seconds\n"
             f"<b>Upload by:</b> @FaceBookDownloadsRobot"
         )
-        await upload_video_with_progress(client, message.chat.id, video_file, thumbnail_file, caption)
+        
+        await upload_video_with_progress(client, message.chat.id, video_file, thumbnail_file, caption, uploading_msg)
 
         await uploading_msg.delete()
 
