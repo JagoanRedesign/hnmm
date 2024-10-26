@@ -6,7 +6,6 @@ from pyrogram.enums import ParseMode
 from mzcoder.config import Config
 from mzcoder.forcesub import handle_force_subscribe
 from moviepy.editor import VideoFileClip
-from tqdm import tqdm  # Impor tqdm untuk progress bar
 
 def get_url(vid_url):
     try:
@@ -33,35 +32,6 @@ def extract_thumbnail(video_file, thumbnail_file):
     with VideoFileClip(video_file) as video:
         # Ambil frame pada detik ke-1 sebagai thumbnail
         video.save_frame(thumbnail_file, t=1)
-
-async def upload_video_with_progress(client, chat_id, video_file, thumbnail_file, caption, uploading_msg):
-    file_size = os.path.getsize(video_file)
-    uploaded_size = 0  # Menyimpan ukuran yang sudah diunggah
-    chunk_size = 1024 * 1024  # 1 MB
-
-    with open(video_file, 'rb') as video, open(thumbnail_file, 'rb') as thumb:
-        while True:
-            chunk = video.read(chunk_size)
-            if not chunk:
-                break
-            
-            # Mengunggah video (dalam potongan)
-            await client.send_video(
-                chat_id=chat_id,
-                video=chunk,
-                thumb=thumb,
-                caption=caption,
-                parse_mode=ParseMode.HTML,
-                supports_streaming=True
-            )
-
-            # Update ukuran yang sudah diunggah
-            uploaded_size += len(chunk)
-
-            # Update pesan setiap 4 MB
-            if uploaded_size % (4 * 1024 * 1024) < len(chunk):  # Cek apakah sudah mencapai 4 MB
-                progress_percentage = (uploaded_size / file_size) * 100
-                await uploading_msg.edit(f"Proses upload... {progress_percentage:.2f}% ({uploaded_size / (1024 * 1024):.2f} MB dari {file_size / (1024 * 1024):.2f} MB)")
 
 @Client.on_message(filters.regex(r'https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.*'))
 async def process_facebook_video_link(client, message):
@@ -91,13 +61,9 @@ async def process_facebook_video_link(client, message):
         # Download the video file with progress bar
         response = requests.get(high_quality_link, stream=True)  # Gunakan stream=True untuk pelacakan kemajuan
         total_size = int(response.headers.get('content-length', 0))  # Dapatkan ukuran total video
-        with open(video_file, 'wb') as f, tqdm(
-            total=total_size, unit='B', unit_scale=True, unit_divisor=1024,
-            desc='Mengunduh', bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{rate_fmt}{postfix}]'
-        ) as bar:
+        with open(video_file, 'wb') as f:
             for data in response.iter_content(chunk_size=4096):
                 f.write(data)
-                bar.update(len(data))  # Perbarui progress bar
 
         # Ekstrak thumbnail dari video
         thumbnail_file = "downloads/thumbnail.jpg"
@@ -119,9 +85,17 @@ async def process_facebook_video_link(client, message):
             f"<b>Upload by:</b> @FaceBookDownloadsRobot"
         )
         
-        await upload_video_with_progress(client, message.chat.id, video_file, thumbnail_file, caption, uploading_msg)
+        # Upload video file directly
+        await client.send_video(
+            chat_id=message.chat.id,
+            video=video_file,  # Pastikan ini adalah path file yang benar
+            thumb=thumbnail_file,
+            caption=caption,
+            parse_mode=ParseMode.HTML,
+            supports_streaming=True
+        )
 
-        await uploading_msg.delete()
+        await uploading_msg.edit("Video berhasil diunggah!")
 
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
