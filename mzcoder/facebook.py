@@ -58,12 +58,19 @@ async def process_facebook_video_link(client, message):
         video_file = "downloads/video.mp4"
         os.makedirs('downloads', exist_ok=True)
 
-        # Download the video file with progress bar
+        # Download the video file with progress tracking
         response = requests.get(high_quality_link, stream=True)  # Gunakan stream=True untuk pelacakan kemajuan
         total_size = int(response.headers.get('content-length', 0))  # Dapatkan ukuran total video
+        downloaded_size = 0
+
         with open(video_file, 'wb') as f:
             for data in response.iter_content(chunk_size=4096):
                 f.write(data)
+                downloaded_size += len(data)
+                
+                # Update pesan setiap 4 MB
+                if downloaded_size % (4 * 1024 * 1024) < len(data):  # Cek apakah sudah mencapai 4 MB
+                    await downloading_msg.edit(f"Sedang mengunduh... {downloaded_size / (1024 * 1024):.2f} MB dari {total_size / (1024 * 1024):.2f} MB")
 
         # Ekstrak thumbnail dari video
         thumbnail_file = "downloads/thumbnail.jpg"
@@ -84,18 +91,18 @@ async def process_facebook_video_link(client, message):
             f"<b>Duration:</b> {duration:.2f} seconds\n"
             f"<b>Upload by:</b> @FaceBookDownloadsRobot"
         )
-        
-        # Upload video file directly
+
+        uploaded_size = 0
         await client.send_video(
             chat_id=message.chat.id,
-            video=video_file,  # Pastikan ini adalah path file yang benar
+            video=video_file,  # Path file video
             thumb=thumbnail_file,
             caption=caption,
             parse_mode=ParseMode.HTML,
             supports_streaming=True
         )
 
-        await uploading_msg.edit("Video berhasil diunggah!")
+        await uploading_msg.delete()
 
     except Exception as e:
         if 'downloading_msg' in locals():  # Pastikan downloading_msg ada
